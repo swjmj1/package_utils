@@ -1,0 +1,5 @@
+# SPDX-FileCopyrightText: 2023 swjmj1 <swjmj1@tuta.io>
+# SPDX-License-Identifier: GPL-3.0-or-later
+
+
+requires_ansible: ">=2.13.0"  # earliest ver. that's not near EOL as of 2023

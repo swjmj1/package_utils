@@ -1,0 +1,15 @@
+# Test playbook for the package_db_facts module
+#
+# SPDX-FileCopyrightText: 2023 swjmj1 <swjmj1@tuta.io>
+# SPDX-License-Identifier: GPL-3.0-or-later
+
+# This playbook uses or adapts some code from the `package_facts`
+# integration test:
+# <https://github.com/ansible/ansible/raw/devel/test/integration/targets/package_facts/tasks/main.yml>.
+#
+# The original copyright notice is as follows:
+
+# (c) 2017, Adam Miller <admiller@redhat.com>
+
+
+# TODO
