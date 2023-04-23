@@ -45,6 +45,11 @@ class PkgMgr(with_metaclass(ABCMeta, object)):  # type: ignore[misc]
         # This takes a 'package' item and returns a dictionary with the package information, name and version are minimal requirements
         pass
 
+    @abstractmethod
+    def search_pkg_substr(self, substr):
+        # Search for packages, installed or not, whose names in the machine's local repository indices match the given substring.
+        pass
+
     def get_packages(self):
         # Take all of the above and return a dictionary of lists of dictionaries (package = list of installed versions)
 
