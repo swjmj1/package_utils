@@ -1,0 +1,18 @@
+# SPDX-FileCopyrightText: 2023 swjmj1 <swjmj1@tuta.io>
+# SPDX-License-Identifier: GPL-3.0-or-later
+
+
+image: archlinux
+packages:
+  - reuse
+  - ansible
+  - ansible-lint
+sources:
+  - https://git.sr.ht/~swjmj1/package_utils
+tasks:
+  - reuse: |
+      cd package_utils
+      reuse lint
+  - ansible-lint: |
+      cd package_utils
+      ansible-lint -x galaxy[version-incorrect]   # ignore until ver. 1.0.0
