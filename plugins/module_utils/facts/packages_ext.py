@@ -65,6 +65,29 @@ class PkgMgr(with_metaclass(ABCMeta, object)):  # type: ignore[misc]
                 installed_packages[name].append(package_details)
         return installed_packages
 
+    def search_packages(self, *search_terms):
+        # Search for packages, installed or not, by the given search terms.
+        #
+        # Return a dictionary where each key is a given search term, each of whose values is a list of dictionaries returned by
+        # the "get_package_details" method in this class. (I.e., return a dictionary of lists of dictionaries.)
+        #
+        # For each search term with no matches found, the corresponding value is an empty list. If no search terms are given,
+        # then the whole returned dictionary is empty.
+        #
+        # Arguments:
+        #   *search_terms -- sequence of strings to match against a system's local repo indices; duplicate items are removed
+
+        search_results = {}
+        for substr in set(search_terms):
+            result_list = []
+            for package in self.search_pkg_substr(substr):
+                package_details = self.get_package_details(package)
+                if 'source' not in package_details:
+                    package_details['source'] = self.__class__.__name__.lower()
+                result_list.append(package_details)
+            search_results[substr] = result_list
+        return search_results
+
 
 class LibMgr(PkgMgr):
 
