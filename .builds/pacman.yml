@@ -5,8 +5,8 @@
 image: archlinux
 packages:
   - reuse
-  - ansible
   - ansible-lint
+  - python-pip
 sources:
   - https://git.sr.ht/~swjmj1/package_utils
 tasks:
@@ -16,3 +16,9 @@ tasks:
   - ansible-lint: |
       cd package_utils
       ansible-lint -x galaxy[version-incorrect]   # ignore until ver. 1.0.0
+  - unit-tests: |
+      python3 -m pip install --user ansible pytest pytest-xdist pytest-forked
+      mkdir -p ansible_collections/swjmj1
+      mv -f package_utils ansible_collections/swjmj1
+      cd ansible_collections/swjmj1/package_utils
+      ansible-test units -v
