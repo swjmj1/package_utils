@@ -32,8 +32,9 @@ class PkgMgr(with_metaclass(ABCMeta, object)):  # type: ignore[misc]
     @abstractmethod
     def is_available(self):
         """
-        This method is supposed to return True/False if the package manager is currently installed/usable
-        It can also 'prep' the required systems in the process of detecting availability
+        This method is supposed to return True/False if the package
+        manager is currently installed/usable It can also 'prep' the
+        required systems in the process of detecting availability
         """
         pass
 
@@ -47,20 +48,23 @@ class PkgMgr(with_metaclass(ABCMeta, object)):  # type: ignore[misc]
     @abstractmethod
     def get_package_details(self, package):
         """
-        This takes a 'package' item and returns a dictionary with the package information, name and version are minimal requirements
+        This takes a 'package' item and returns a dictionary with the
+        package information, name and version are minimal requirements
         """
         pass
 
     @abstractmethod
     def search_pkg_substr(self, substr):
         """
-        Search for packages, installed or not, whose names in the machine's local repository indices match the given substring.
+        Search for packages, installed or not, whose names in the
+        machine's local repository indices match the given substring.
         """
         pass
 
     def get_packages(self):
         """
-        Take all of the above and return a dictionary of lists of dictionaries (package = list of installed versions)
+        Take all of the above and return a dictionary of lists of
+        dictionaries (package = list of installed versions)
         """
 
         installed_packages = {}
@@ -76,16 +80,21 @@ class PkgMgr(with_metaclass(ABCMeta, object)):  # type: ignore[misc]
         return installed_packages
 
     def search_packages(self, *search_terms):
-        """Search for packages, installed or not, by the given search terms.
+        """Search all local repo indices by the given search terms.
 
-        Return a dictionary where each key is a given search term, each of whose values is a list of dictionaries returned by
-        the "get_package_details" method in this class. (I.e., return a dictionary of lists of dictionaries.)
+        Return a dictionary where each key is a given search term, each
+        of whose values is a list of dictionaries returned by the
+        "get_package_details" method in this class. (I.e., return a
+        dictionary of lists of dictionaries.)
 
-        For each search term with no matches found, the corresponding value is an empty list. If no search terms are given,
-        then the whole returned dictionary is empty.
+        For each search term with no matches found, the corresponding
+        value is an empty list. If no search terms are given, then the
+        whole returned dictionary is empty.
 
         Arguments:
-          *search_terms -- sequence of strings to match against a system's local repo indices; duplicate items are removed
+          *search_terms -- sequence of strings to match against local
+                           repo indices (with any duplicate items
+                           automatically removed upon processing)
         """
 
         search_results = {}
