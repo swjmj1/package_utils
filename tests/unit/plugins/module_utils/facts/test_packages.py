@@ -5,7 +5,7 @@
 from __future__ import (absolute_import, division, print_function)
 __metaclass__ = type
 
-from ansible_collections.swjmj1.package_utils.plugins.module_utils.facts.packages_ext import PkgMgr
+from ansible_collections.swjmj1.package_utils.plugins.module_utils.facts.packages import PkgMgr
 
 
 class PkgMgrExample(PkgMgr):
