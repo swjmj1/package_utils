@@ -29,19 +29,42 @@ def get_all_pkg_managers():
 
 class PkgMgr(with_metaclass(ABCMeta, object)):  # type: ignore[misc]
 
+    requires_module = False     # override as needed
+
+    def __init__(self, module=None):
+        """Store an AnsibleModule object, if given (as "module").
+
+        If "module" is not given but is required, raise a ValueError. If
+        "module" is given, store it as an attribute even if not
+        required.
+        """
+
+        if module is None and self.requires_module:
+            raise ValueError("This PkgMgr needs an AnsibleModule object.")
+        self.module = module
+
     @abstractmethod
     def is_available(self):
         """
         This method is supposed to return True/False if the package
         manager is currently installed/usable It can also 'prep' the
         required systems in the process of detecting availability
+
+        The calling code's AnsibleModule object may have to be given as
+        an argument, depending on the subclass. A ValueError should be
+        raised if it is needed but not given.
         """
         pass
 
     @abstractmethod
     def list_installed(self):
         """
-        This method should return a list of installed packages, each list item will be passed to get_package_details
+        This method should return a list of installed packages, each
+        list item will be passed to get_package_details
+
+        The calling code's AnsibleModule object may have to be given as
+        an argument, depending on the subclass. A ValueError should be
+        raised if it is needed but not given.
         """
         pass
 
@@ -113,10 +136,10 @@ class LibMgr(PkgMgr):
 
     LIB = None  # type: str | None
 
-    def __init__(self):
+    def __init__(self, module=None):
 
         self._lib = None
-        super(LibMgr, self).__init__()
+        super(LibMgr, self).__init__(module)
 
     def is_available(self):
         found = False
@@ -130,12 +153,13 @@ class LibMgr(PkgMgr):
 
 class CLIMgr(PkgMgr):
 
+    requires_module = True      # must have access to method run_command
     CLI = None  # type: str | None
 
-    def __init__(self):
+    def __init__(self, module=None):
 
         self._cli = None
-        super(CLIMgr, self).__init__()
+        super(CLIMgr, self).__init__(module)
 
     def is_available(self):
         try:
