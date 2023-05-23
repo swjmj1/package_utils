@@ -23,6 +23,7 @@ from __future__ import absolute_import, division, print_function
 __metaclass__ = type
 
 import re
+from functools import wraps
 
 from ansible.module_utils.common.text.converters import to_native, to_text
 from ansible.module_utils.basic import missing_required_lib
@@ -30,7 +31,7 @@ from ansible.module_utils.common.locale import get_best_parsable_locale
 from ansible.module_utils.common.process import get_bin_path
 from ansible.module_utils.common.respawn import has_respawned, probe_interpreters_for_module, respawn_module
 
-from ansible_collections.plugins.module_utils.facts.packages import LibMgr, CLIMgr, get_all_pkg_managers
+from ansible_collections.swjmj1.package_utils.plugins.module_utils.facts.packages import LibMgr, CLIMgr, get_all_pkg_managers
 
 
 class RPM(LibMgr):
@@ -291,3 +292,119 @@ class PKG_INFO(CLIMgr):
 
     def search_pkg_substr(self, substr):
         pass
+
+
+def for_each_pkg_mgr(fn):
+    """Call function "fn" for each package manager found on the system.
+
+    For modules dealing with package managers, use this as a decorator
+    on the main function to avoid reinventing the process of finding
+    package managers available on the system. "fn" should perform its
+    module's unique functionality upon the calling code's AnsibleModule
+    object, using the methods of the given PkgMgr object as needed; it
+    should also update the given dict of results as appropriate for the
+    module in question.
+
+    Accordingly, "fn" must take the following arguments:
+      module -- the calling code's AnsibleModule object
+      results -- dict of return values for the calling code's module
+      pkg_mgr -- some instance of a PkgMgr subclass
+
+    In addition, "fn" may take other arbitrary KEYWORD arguments.
+
+    Unfortunate caveats (for proper integration with existing code):
+
+      The "module" object must contain at least two key-value pairs in
+      its dict "params": "manager" and "strategy". For details, see the
+      docs for Ansible's built-in "package_facts" module.
+
+      "fn" should NOT call the module's "exit_json" method, lest
+      execution end prematurely; also, prefer the "warn" method over
+      "fail_json".
+
+      When "fn" is decorated with this function, the calling code must
+      omit argument "pkg_mgr" upon calling "fn".
+
+    Arguments:
+      fn -- callable that takes the arguments described above
+    Errors:
+      ValueError -- if erroneously called with argument "pkg_mgr"
+    """
+
+    @wraps(fn)
+    def wrap_package_module(module, results, **kwargs):
+        """Code abstracted from Ansible's package_facts module."""
+
+        # Fail fast if called with "pkg_mgr".
+        if "pkg_mgr" in kwargs:
+            raise ValueError(
+                'You should omit argument "pkg_mgr"'
+                ' from this function call,'
+                ' due to the decorator "for_each_pkg_mgr".'
+            )
+
+        # get supported pkg managers
+        PKG_MANAGERS = get_all_pkg_managers()
+        PKG_MANAGER_NAMES = [x.lower() for x in PKG_MANAGERS.keys()]
+
+        managers = [x.lower() for x in module.params['manager']]
+        strategy = module.params['strategy']
+
+        if 'auto' in managers:
+            # keep order from user, we do dedupe below
+            managers.extend(PKG_MANAGER_NAMES)
+            managers.remove('auto')
+
+        unsupported = set(managers).difference(PKG_MANAGER_NAMES)
+        if unsupported:
+            if 'auto' in module.params['manager']:
+                msg = 'Could not auto detect a usable package manager,' \
+                    ' check warnings for details.'
+            else:
+                msg = 'Unsupported package managers requested: %s' \
+                    % (', '.join(unsupported))
+            module.fail_json(msg=msg)
+
+        found = 0
+        seen = set()
+        for pkgmgr in managers:
+            if found and strategy == 'first':
+                break
+
+            # dedupe as per above
+            if pkgmgr in seen:
+                continue
+            seen.add(pkgmgr)
+
+            try:
+                try:
+                    # manager throws exception on init (calls self.test)
+                    # if not usable.
+                    manager = PKG_MANAGERS[pkgmgr](module)
+                    if manager.is_available():
+                        found += 1
+                        fn(module, results, pkg_mgr=manager, **kwargs)
+                except Exception as e:
+                    if pkgmgr in module.params['manager']:
+                        module.warn('Requested package manager %s'
+                                    ' was not usable by this module: %s'
+                                    % (pkgmgr, to_text(e)))
+                    continue
+            except Exception as e:
+                if pkgmgr in module.params['manager']:
+                    module.warn('Function "%s" failed with package manager %s:'
+                                ' %s' % (fn.__name__, pkgmgr, to_text(e)))
+
+        if found == 0:
+            msg = (
+                'Could not detect a supported package manager'
+                ' from the following list: %s,'
+                ' or the required Python library is not installed.'
+                ' Check warnings for details.'
+                % managers
+            )
+            module.fail_json(msg=msg)
+
+        module.exit_json(**results)
+
+    return wrap_package_module
