@@ -265,7 +265,12 @@ class APK(CLIMgr):
             return raw_pkg_details
 
     def search_pkg_substr(self, substr):
-        pass
+        rc, out, err = self.module.run_command([
+            self._cli, 'search', substr,
+        ])
+        if rc != 0 or err:
+            raise Exception("Unable to list packages rc=%s : %s" % (rc, err))
+        return out.splitlines()
 
 
 class PKG_INFO(CLIMgr):
