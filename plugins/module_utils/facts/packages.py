@@ -114,6 +114,11 @@ class PkgMgr(with_metaclass(ABCMeta, object)):  # type: ignore[misc]
         value is an empty list. If no search terms are given, then the
         whole returned dictionary is empty.
 
+        Since some package managers can return "matches" whose names do
+        not match the given search term -- e.g., apk returns "john" when
+        searching for "ansible" -- any spurious results are pruned from
+        the return value.
+
         Arguments:
           *search_terms -- sequence of strings to match against local
                            repo indices (with any duplicate items
@@ -127,7 +132,8 @@ class PkgMgr(with_metaclass(ABCMeta, object)):  # type: ignore[misc]
                 package_details = self.get_package_details(package)
                 if 'source' not in package_details:
                     package_details['source'] = self.__class__.__name__.lower()
-                result_list.append(package_details)
+                if substr in package_details['name']:
+                    result_list.append(package_details)
             search_results[substr] = result_list
         return search_results
 

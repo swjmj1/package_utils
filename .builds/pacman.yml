@@ -22,3 +22,7 @@ tasks:
       mv -f package_utils ansible_collections/swjmj1
       cd ansible_collections/swjmj1/package_utils
       ansible-test units -v
+  - integration-tests: |
+      python3 -m pip install --user ansible
+      cd ansible_collections/swjmj1/package_utils
+      ansible-test integration -v

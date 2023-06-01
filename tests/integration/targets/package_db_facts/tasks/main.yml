@@ -11,5 +11,45 @@
 
 # (c) 2017, Adam Miller <admiller@redhat.com>
 
+# (The aforementioned code hasn't been borrowed yet, but it will be.)
+# NOTE: Update as more package managers are supported.
+# NOTE: This should, of course, be run for each supported package
+# manager in CI.
 
-# TODO
+
+- name: Search for packages using the current package manager
+  when: ansible_os_family in ["Alpine"]
+  block:
+    - name: Search for example packages, the last of which should return nothing
+      swjmj1.package_utils.package_db_facts:
+        search_terms:
+          - python
+          - ansible
+          - nonexistentpackagename
+
+    - name: Ensure search results were returned in the first place
+      ansible.builtin.assert:
+        that: "{{ ansible_facts.package_search_results is defined }}"
+
+    - name: Ensure some results were returned for python and ansible
+      ansible.builtin.assert:
+        that: "{{ ansible_facts.package_search_results[item] | length > 0 }}"
+      loop: "{{ ['python', 'ansible'] }}"
+
+    # We check entries for Python and Ansible separately due to the
+    # inconvenience of nesting loops with "include_tasks".
+    - name: Sanity check each package details entry for python
+      ansible.builtin.include_tasks: check_package_details.yml
+      loop: "{{ ansible_facts.package_search_results.python }}"
+      vars:
+        search_term: python
+
+    - name: Sanity check each package details entry for ansible
+      ansible.builtin.include_tasks: check_package_details.yml
+      loop: "{{ ansible_facts.package_search_results.ansible }}"
+      vars:
+        search_term: ansible
+
+    - name: Ensure there were NO results for the nonexistent package
+      ansible.builtin.assert:
+        that: "{{ ansible_facts.package_search_results.nonexistentpackagename | length == 0 }}"

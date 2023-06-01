@@ -1,0 +1,20 @@
+# SPDX-FileCopyrightText: 2023 swjmj1 <swjmj1@tuta.io>
+# SPDX-License-Identifier: GPL-3.0-or-later
+
+# * intended for the main integration test for module package_db_search
+# * expects variable "item" to be defined
+
+
+- name: Ensure the minimum required fields are in the package details
+  block:
+    - name: Check the package name
+      ansible.builtin.assert:
+        that: "{{ search_term in item['name'] }}"
+
+    - name: Ensure the package version is given
+      ansible.builtin.assert:
+        that: "{{ item['version'] is defined }}"
+
+    - name: Ensure the package source (i.e. package manager) is given
+      ansible.builtin.assert:
+        that: "{{ item['source'] is defined }}"
