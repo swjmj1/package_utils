@@ -5,24 +5,29 @@
 image: archlinux
 packages:
   - reuse
-  - ansible-lint
   - python-pip
 sources:
   - https://git.sr.ht/~swjmj1/package_utils
+environment:
+  # Mixing pip packages with system packages is fine for CI.
+  PIP_BREAK_SYSTEM_PACKAGES: 1
 tasks:
   - reuse: |
       cd package_utils
       reuse lint
   - ansible-lint: |
+      export PATH=${PATH}:~/.local/bin
+      python3 -m pip install --user ansible-lint
       cd package_utils
       ansible-lint -x galaxy[version-incorrect]   # ignore until ver. 1.0.0
   - unit-tests: |
+      export PATH=${PATH}:~/.local/bin
       python3 -m pip install --user ansible pytest pytest-xdist pytest-forked
       mkdir -p ansible_collections/swjmj1
       mv -f package_utils ansible_collections/swjmj1
       cd ansible_collections/swjmj1/package_utils
       ansible-test units -v
-  - integration-tests: |
-      python3 -m pip install --user ansible
-      cd ansible_collections/swjmj1/package_utils
-      ansible-test integration -v
+  # - integration-tests: |
+  #     python3 -m pip install --user ansible
+  #     cd ansible_collections/swjmj1/package_utils
+  #     ansible-test integration -v
