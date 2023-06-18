@@ -16,4 +16,4 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
-- Facts module `package_db_facts`, supporting apk.
+- Facts module `package_db_facts`, supporting apk and pacman.

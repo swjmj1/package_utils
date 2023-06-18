@@ -174,7 +174,64 @@ class PACMAN(CLIMgr):
         }
 
     def search_pkg_substr(self, substr):
-        pass
+        """Search for substr via pacman -Ss. Return info for each match.
+
+        Since options "-s" (search) and "-i" (info) cannot be used
+        together, find matching packages via "-s" first, then return
+        info on each match via "-i".
+
+        `pacman -Ss` outputs two lines for each matching package, with
+        the package's repo, name, and version on the first line, then
+        its description indented on the next line (and so on), like so:
+            core/python 3.1.3-2
+                Next generation of the python...
+            ...
+
+        `pacman -Si` outputs blocks in a "key: value" format like so:
+            Repository      : core
+            Name            : python
+            ...
+
+        Raise an exception if either `pacman -Ss` or `pacman -Si` fails.
+        However, note that failure to find a matching package is, in
+        this case, an expected possibility for `-Ss`, so no exception is
+        raised in that situation -- but for `-Si`, an exception IS
+        raised upon failure to find a matching package.
+
+        Also, raise an exception if for some reason `-Ss` produces
+        output different from its usual format.
+        """
+
+        locale = get_best_parsable_locale(self.module)
+        rc, out, err = self.module.run_command(
+            [self._cli, '-Ss', substr],
+            environ_update=dict(LC_ALL=locale)
+        )
+
+        if (out != "" and rc != 0) or err:
+            raise Exception("Unable to list packages rc=%s : %s" % (rc, err))
+        elif out == "":
+            return []
+
+        search_results = out.splitlines()
+        if len(search_results) % 2 != 0:
+            raise Exception('Unexpected output when searching for "%s":\n\n%s'
+                    % (substr, out))
+
+        info = []
+        for line in search_results[::2]:
+            repo_and_name = line.split()[0]     # exclude the version number
+            rc, out, err = self.module.run_command(
+                [self._cli, '-Si', repo_and_name],
+                environ_update=dict(LC_ALL=locale)
+            )
+            if rc != 0 or err:
+                raise Exception(
+                    'Unable to get info about package "%s" rc=%s : %s'
+                    % (repo_and_name, rc, err)
+                )
+            info.append(out)
+        return info
 
 
 class PKG(CLIMgr):
