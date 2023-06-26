@@ -82,7 +82,8 @@ class RPM(LibMgr):
         return we_have_lib
 
     def search_pkg_substr(self, substr):
-        pass
+        matches = self._transaction_set.dbMatch("name", substr)
+        return [m for m in matches]
 
 
 class APT(LibMgr):
