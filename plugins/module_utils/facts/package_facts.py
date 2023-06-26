@@ -222,7 +222,7 @@ class PACMAN(CLIMgr):
         search_results = out.splitlines()
         if len(search_results) % 2 != 0:
             raise Exception('Unexpected output when searching for "%s":\n\n%s'
-                    % (substr, out))
+                            % (substr, out))
 
         info = []
         for line in search_results[::2]:
