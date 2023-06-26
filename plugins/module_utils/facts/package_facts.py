@@ -39,8 +39,14 @@ class RPM(LibMgr):
     requires_module = True      # for warning if library isn't found
     LIB = 'rpm'
 
+    def __init__(self):
+        """Import the RPM library and prepare to query the RPM DB."""
+
+        super(RPM, self).__init__()
+        self._transaction_set = self._lib.TransactionSet()
+
     def list_installed(self):
-        return self._lib.TransactionSet().dbMatch()
+        return self._transaction_set.dbMatch()
 
     def get_package_details(self, package):
         return dict(name=package[self._lib.RPMTAG_NAME],
