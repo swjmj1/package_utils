@@ -122,7 +122,7 @@ ansible_facts:
 from ansible.module_utils.basic import AnsibleModule
 
 from ansible_collections.swjmj1.package_utils.plugins.module_utils.facts.packages \
-    import PkgMgr, get_all_pkg_managers
+    import get_all_pkg_managers
 from ansible_collections.swjmj1.package_utils.plugins.module_utils.facts.package_facts \
     import for_each_pkg_mgr
 
