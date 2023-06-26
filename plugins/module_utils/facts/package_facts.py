@@ -132,7 +132,8 @@ class APT(LibMgr):
         return dict(name=package, version=ac_pkg.version, arch=ac_pkg.architecture, category=ac_pkg.section, origin=ac_pkg.origins[0].origin)
 
     def search_pkg_substr(self, substr):
-        pass
+        cache = self.pkg_cache
+        return [pk for pk in cache.keys() if cache[pk].name.contains(substr)]
 
 
 class PACMAN(CLIMgr):
