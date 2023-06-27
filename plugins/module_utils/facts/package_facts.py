@@ -133,7 +133,7 @@ class APT(LibMgr):
 
     def search_pkg_substr(self, substr):
         cache = self.pkg_cache
-        return [pk for pk in cache.keys() if cache[pk].name.contains(substr)]
+        return [pk for pk in cache.keys() if substr in cache[pk].name]
 
 
 class PACMAN(CLIMgr):
