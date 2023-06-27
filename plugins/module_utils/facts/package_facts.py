@@ -39,12 +39,6 @@ class RPM(LibMgr):
     requires_module = True      # for warning if library isn't found
     LIB = 'rpm'
 
-    def __init__(self, module=None):
-        """Import the RPM library and prepare to query the RPM DB."""
-
-        super(RPM, self).__init__(module)
-        self._transaction_set = self._lib.TransactionSet()
-
     def list_installed(self):
         return self._transaction_set.dbMatch()
 
@@ -60,6 +54,12 @@ class RPM(LibMgr):
         warning if they are missing and we have rpm cli'''
 
         we_have_lib = super(RPM, self).is_available()
+
+        # Changed from the original Ansible code: initialize the
+        # TransactionSet here rather than in list_installed() so that
+        # other methods can use it.
+        if we_have_lib:
+            self._transaction_set = self._lib.TransactionSet()
 
         try:
             get_bin_path('rpm')
