@@ -86,7 +86,7 @@ class APT(LibMgr):
 
     def __init__(self, module=None):
         self._cache = None
-        super(APT, self).__init__()
+        super(APT, self).__init__(module)
 
     @property
     def pkg_cache(self):
