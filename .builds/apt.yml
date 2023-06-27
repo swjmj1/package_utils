@@ -5,6 +5,7 @@
 image: debian/stable
 packages:
   - python3-pip
+  - python3-apt
 sources:
   - https://git.sr.ht/~swjmj1/package_utils
 environment:
