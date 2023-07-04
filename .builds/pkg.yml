@@ -1,0 +1,27 @@
+# SPDX-FileCopyrightText: 2023 swjmj1 <swjmj1@tuta.io>
+# SPDX-License-Identifier: GPL-3.0-or-later
+
+
+image: freebsd/latest
+packages:
+  - python3
+  # required by Python's cryptography package
+  - rust
+  # required by Python's sqlite module
+  - sqlite
+sources:
+  - https://git.sr.ht/~swjmj1/package_utils
+tasks:
+  - integration-tests: |
+      mkdir -p ansible_collections/swjmj1
+      mv -f package_utils ansible_collections/swjmj1
+
+      # We need a virtualenv to access pip.
+      python3 -m venv ci-env
+      source ~/ci-env/bin/activate
+
+      export PATH=${PATH}:~/.local/bin
+      python3 -m pip install ansible
+
+      cd ansible_collections/swjmj1/package_utils
+      ansible-test integration -v
