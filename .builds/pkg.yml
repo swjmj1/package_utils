@@ -7,8 +7,8 @@ packages:
   - python3
   # required by Python's cryptography package
   - rust
-  # required by Python's sqlite module
-  - sqlite
+  # required by Python's sqlite module?
+  - py39-sqlite3
 sources:
   - https://git.sr.ht/~swjmj1/package_utils
 tasks:
