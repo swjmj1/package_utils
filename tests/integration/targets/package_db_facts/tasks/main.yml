@@ -18,7 +18,7 @@
 
 
 - name: Search for packages using the current package manager
-  when: ansible_os_family in ["Alpine", "Archlinux"]
+  when: ansible_os_family in ["Alpine", "Archlinux", "FreeBSD"]
   block:
     - name: Search for example packages, the last of which should return nothing
       swjmj1.package_utils.package_db_facts:
