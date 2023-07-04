@@ -239,6 +239,11 @@ class PKG(CLIMgr):
     CLI = 'pkg'
     atoms = ['name', 'version', 'origin', 'installed', 'automatic', 'arch', 'category', 'prefix', 'vital']
 
+    # These are the output fields that `pkg search` shares with `pkg
+    # info`; if a field exists here, then it also exists in
+    # "self.atoms".
+    search_output_fields = ['name', 'version', 'repository', 'arch', 'prefix']
+
     def list_installed(self):
         rc, out, err = self.module.run_command([self._cli, 'query', "%%%s" % '\t%'.join(['n', 'v', 'R', 't', 'a', 'q', 'o', 'p', 'V'])])
         if rc != 0 or err:
@@ -278,7 +283,49 @@ class PKG(CLIMgr):
         return pkg
 
     def search_pkg_substr(self, substr):
-        pass
+        """Search for substr via `pkg search`.
+
+        (For context, `pkg query` can only search installed packages.)
+
+        Return a string containing a tab-separated list of output
+        values, ordered as expected by method "get_package_details".
+
+        Include in the returned string only the package info that can be
+        output by both `pkg query` and `pkg search`. If a value expected
+        by "get_package_details" is absent, then put an empty string
+        where expected in the list, such that using "split()" on the
+        returned string results in an empty string at its designated
+        index.
+
+        Issue a module warning if any line of output from `pkg search`
+        has a format that doesn't consist of a requested field and its
+        associated value; this might indicate a change in `pkg search`
+        output, which should be brought to attention.
+        """
+
+        rc, out, err = self.module.run_command([
+            self._cli,
+            'search',
+            '-s pkg-name',
+            '-U',           # don't update the repo catalogue every search
+            *['-Q %s' % f for f in self.search_output_fields],
+            substr,
+        ])
+        if rc != 0 or err:
+            raise Exception('Unable to search for package "%s" rc=%s : %s' 
+                            % (substr, rc, err))
+
+        # Put lines into a tab-separated list in the order expected by
+        # "get_package_details". Filter out unexpected lines.
+        output_fields = [""] * len(self.atoms)
+        for line in out.splitlines():
+            try:
+                field, value = line.split("\t")
+                index = self.atoms.index(field)
+                output_fields.insert(index, value)
+            except ValueError:
+                module.warn("Unexpected output from `pkg search`: %s" % line)
+        return "\t".join(output_fields)
 
 
 class PORTAGE(CLIMgr):
