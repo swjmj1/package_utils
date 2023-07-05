@@ -320,8 +320,14 @@ class PKG(CLIMgr):
         output_fields = [""] * len(self.atoms)
         for line in out.splitlines():
             try:
-                field, value = line.split("\t")
-                index = self.atoms.index(field)
+                field, value = re.split(line, r"\s*:\s*", maxsplit=1)
+                atom_name = field.lower()
+
+                # We get the "comment" field (i.e. package description)
+                # whether we like it or not.
+                if atom_name == "comment":
+                    continue
+                index = self.atoms.index(atom_name)
                 output_fields[index] = value
             except ValueError:
                 module.warn("Unexpected output from `pkg search`: %s" % line)
