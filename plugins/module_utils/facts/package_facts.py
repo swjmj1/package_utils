@@ -325,9 +325,8 @@ class PKG(CLIMgr):
                 continue
 
             try:
-                field, value = [(f.strip(), v.strip())
-                                for f, v in line.split(maxsplit=1)]
-                atom_name = field.lower()
+                label, value = [f.strip() for f in line.split(":", maxsplit=1)]
+                atom_name = label.lower()
 
                 # We get the "comment" field (i.e. package description)
                 # whether we like it or not.
