@@ -306,9 +306,9 @@ class PKG(CLIMgr):
         rc, out, err = self.module.run_command([
             self._cli,
             'search',
-            '-s pkg-name',
+            '--search=pkg-name',
             '-U',           # don't update the repo catalogue every search
-            *['-Q %s' % f for f in self.search_output_fields],
+            *['--query-modifier=%s' % f for f in self.search_output_fields],
             substr,
         ])
         if rc != 0 or err:
