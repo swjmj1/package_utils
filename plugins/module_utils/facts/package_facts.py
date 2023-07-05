@@ -322,7 +322,7 @@ class PKG(CLIMgr):
             try:
                 field, value = line.split("\t")
                 index = self.atoms.index(field)
-                output_fields.insert(index, value)
+                output_fields[index] = value
             except ValueError:
                 module.warn("Unexpected output from `pkg search`: %s" % line)
         return "\t".join(output_fields)
