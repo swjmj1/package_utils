@@ -325,7 +325,8 @@ class PKG(CLIMgr):
                 continue
 
             try:
-                field, value = re.split(line, r"\s*:\s*", maxsplit=1)
+                field, value = [(f.strip(), v.strip())
+                                for f, v in line.split(maxsplit=1)]
                 atom_name = field.lower()
 
                 # We get the "comment" field (i.e. package description)
@@ -342,7 +343,7 @@ class PKG(CLIMgr):
 class PORTAGE(CLIMgr):
 
     CLI = 'qlist'
-    atoms = ['category', 'name', 'version', 'ebuild_revision', 'slots', 'prefixes', 'sufixes']
+    atoms = ['category', 'name', 'version', 'ebuild_eevision', 'slots', 'prefixes', 'sufixes']
 
     def list_installed(self):
         rc, out, err = self.module.run_command(' '.join([self._cli, '-Iv', '|', 'xargs', '-n', '1024', 'qatom']), use_unsafe_shell=True)
