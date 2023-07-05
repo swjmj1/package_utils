@@ -319,6 +319,11 @@ class PKG(CLIMgr):
         # "get_package_details". Filter out unexpected lines.
         output_fields = [""] * len(self.atoms)
         for line in out.splitlines():
+            # Each package listing has one line containing just the
+            # package name -- no field label.
+            if ":" not in line:
+                continue
+
             try:
                 field, value = re.split(line, r"\s*:\s*", maxsplit=1)
                 atom_name = field.lower()
