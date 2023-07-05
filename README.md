@@ -9,7 +9,7 @@ SPDX-License-Identifier: CC0-1.0
 An Ansible collection adding extra ways to interact with package
 managers (portably)
 
-[![builds.sr.ht status](https://builds.sr.ht/~swjmj1/package_utils.svg)](https://builds.sr.ht/~swjmj1/package_utils?)
+[![builds.sr.ht status](https://builds.sr.ht/~swjmj1/package_utils/commits/main.svg)](https://builds.sr.ht/~swjmj1/package_utils/commits/main?)
 
 package_utils extends Ansible's functionality for interacting with
 package managers. It aims to provide new modules or roles that invoke a
