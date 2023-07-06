@@ -332,6 +332,10 @@ class PKG(CLIMgr):
                 # whether we like it or not.
                 if atom_name == "comment":
                     continue
+                # Account for the fact that the label "architecture" is
+                # output non-abbreviated.
+                if atom_name == "architecture":
+                    atom_name = "arch"
                 index = self.atoms.index(atom_name)
                 output_fields[index] = value
             except ValueError:
