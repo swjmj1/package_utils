@@ -242,7 +242,7 @@ class PKG(CLIMgr):
     # These are the output fields that `pkg search` shares with `pkg
     # info`; if a field exists here, then it also exists in
     # "self.atoms".
-    search_output_fields = ['name', 'version', 'repository', 'arch', 'prefix']
+    search_output_fields = ['name', 'version', 'origin', 'arch', 'prefix']
 
     def list_installed(self):
         rc, out, err = self.module.run_command([self._cli, 'query', "%%%s" % '\t%'.join(['n', 'v', 'R', 't', 'a', 'q', 'o', 'p', 'V'])])
