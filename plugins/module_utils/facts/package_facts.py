@@ -233,7 +233,6 @@ class PACMAN(CLIMgr):
             info.append(out)
         return info
 
-import epdb
 
 class PKG(CLIMgr):
 
@@ -288,23 +287,22 @@ class PKG(CLIMgr):
 
         (For context, `pkg query` can only search installed packages.)
 
-        Return a string containing a tab-separated list of output
-        values, ordered as expected by method "get_package_details".
+        Return a list of strings, where each string contains a
+        tab-delimited list of output values, ordered as expected by
+        method "get_package_details".
 
-        Include in the returned string only the package info that can be
-        output by both `pkg query` and `pkg search`. If a value expected
-        by "get_package_details" is absent, then put an empty string
-        where expected in the list, such that using "split()" on the
-        returned string results in an empty string at its designated
+        Include in each string only the package info that can be output
+        by both `pkg query` and `pkg search`. If a value expected by
+        "get_package_details" is absent, then put an empty string where
+        expected in the tab-delimited string, such that using "split()"
+        on the string results in an empty string at its designated
         index.
 
         Issue a module warning if any line of output from `pkg search`
-        has a format that doesn't consist of a requested field and its
-        associated value; this might indicate a change in `pkg search`
-        output, which should be brought to attention.
+        has an unexpected format; this might indicate a change in `pkg
+        search` output, which should be brought to attention.
         """
 
-        epdb.serve()
         rc, out, err = self.module.run_command([
             self._cli,
             'search',
@@ -317,33 +315,36 @@ class PKG(CLIMgr):
             raise Exception('Unable to search for package "%s" rc=%s : %s' 
                             % (substr, rc, err))
 
-        # Put lines into a tab-separated list in the order expected by
-        # "get_package_details". Filter out unexpected lines.
-        output_fields = [""] * len(self.atoms)
-        for line in out.splitlines():
-            # Each package listing has one line containing just the
-            # package name -- no field label.
-            if ":" not in line:
-                continue
-
-            try:
-                label, value = [f.strip() for f in line.split(":", maxsplit=1)]
-                atom_name = label.lower()
-
-                # We get the "comment" field (i.e. package description)
-                # whether we like it or not.
-                if atom_name == "comment":
+        search_results = []
+        new_pkg = True
+        for entry in out.split("\n\n"):
+            output_fields = [""] * len(self.atoms)
+            for i, line in enumerate(entry.splitlines()):
+                # The first line of each entry contains just the package
+                # name, without any field label.
+                if i == 0:
                     continue
-                # Account for the fact that the label "architecture" is
-                # output non-abbreviated.
-                if atom_name == "architecture":
-                    atom_name = "arch"
-                index = self.atoms.index(atom_name)
-                output_fields[index] = value
-            except ValueError:
-                self.module.warn("Unexpected output from `pkg search`: %s"
-                                 % line)
-        return "\t".join(output_fields)
+
+                try:
+                    label, value = [f.strip()
+                                    for f in line.split(":", maxsplit=1)]
+                    atom_name = label.lower()
+
+                    # We get the "comment" field (i.e. package
+                    # description) whether we like it or not.
+                    if atom_name == "comment":
+                        continue
+                    # Account for the fact that the label "architecture"
+                    # is output non-abbreviated.
+                    if atom_name == "architecture":
+                        atom_name = "arch"
+                    index = self.atoms.index(atom_name)
+                    output_fields[index] = value
+                except ValueError:
+                    self.module.warn("Unexpected output from `pkg search`: %s"
+                                     % line)
+            search_results.append(output_fields.join("\t"))
+        return search_results
 
 
 class PORTAGE(CLIMgr):
