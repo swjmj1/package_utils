@@ -339,7 +339,8 @@ class PKG(CLIMgr):
                 index = self.atoms.index(atom_name)
                 output_fields[index] = value
             except ValueError:
-                module.warn("Unexpected output from `pkg search`: %s" % line)
+                self.module.warn("Unexpected output from `pkg search`: %s"
+                                 % line)
         return "\t".join(output_fields)
 
 
