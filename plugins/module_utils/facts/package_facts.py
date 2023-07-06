@@ -311,7 +311,11 @@ class PKG(CLIMgr):
             *['--query-modifier=%s' % f for f in self.search_output_fields],
             substr,
         ])
-        if rc != 0 or err:
+
+        # `pkg search` returns 1 if no results are found, so only treat
+        # a non-zero status as an error if something was output to
+        # stderr too.
+        if rc != 0 and err:
             raise Exception('Unable to search for package "%s" rc=%s : %s' 
                             % (substr, rc, err))
 
