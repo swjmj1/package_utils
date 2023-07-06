@@ -233,6 +233,7 @@ class PACMAN(CLIMgr):
             info.append(out)
         return info
 
+import epdb
 
 class PKG(CLIMgr):
 
@@ -303,6 +304,7 @@ class PKG(CLIMgr):
         output, which should be brought to attention.
         """
 
+        epdb.serve()
         rc, out, err = self.module.run_command([
             self._cli,
             'search',

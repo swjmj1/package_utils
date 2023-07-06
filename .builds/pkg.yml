@@ -21,7 +21,7 @@ tasks:
       source ~/ci-env/bin/activate
 
       export PATH=${PATH}:~/.local/bin
-      python3 -m pip install ansible
+      python3 -m pip install ansible epdb
 
       cd ansible_collections/swjmj1/package_utils
       ansible-test integration -v
